@@ -6,7 +6,7 @@
 
 ### Installation
 ```sh
-git clone <repo-url>
+git clone https://github.com/ArunReddy9119/Stock_Screener
 cd financial_analyzer
 poetry install
 ```
@@ -154,7 +154,7 @@ A Python-based financial analysis pipeline for processing, analyzing, and genera
 - **`processor.py`**: Data merging and technical indicator calculations
 - **`signals.py`**: Golden cross and death cross detection
 - **`database.py`**: SQLite operations with idempotent inserts
-- **`main.py`**: CLI interface with Typer
+- **`main.py`**: CLI interface with Argparse
 
 ### Design Decisions
 
