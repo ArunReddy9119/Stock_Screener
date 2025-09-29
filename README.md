@@ -1,3 +1,123 @@
+#  Setup Instructions
+
+### Prerequisites
+- Python 3.9+
+- Poetry (recommended) or uv package manager
+
+### Installation
+```sh
+git clone <repo-url>
+cd financial_analyzer
+poetry install
+```
+
+### Configuration
+Copy `config.yaml.example` to `config.yaml` and edit as needed for your data sources and settings.
+
+---
+
+#  Usage Examples
+
+**US Stocks:**
+```sh
+poetry run python -m src.main --ticker NVDA --output output/nvda_analysis.json
+poetry run python -m src.main --ticker AAPL --output output/aapl_analysis.json
+```
+**Indian Stocks:**
+```sh
+poetry run python -m src.main --ticker RELIANCE.NS --output output/reliance_analysis.json
+poetry run python -m src.main --ticker TCS.NS --output output/tcs_analysis.json
+```
+**Recent IPOs:**
+```sh
+poetry run python -m src.main --ticker SWIGGY.NS --output output/swiggy_analysis.json
+poetry run python -m src.main --ticker HYUNDAI.NS --output output/hyundai_analysis.json
+poetry run python -m src.main --ticker URBANCOMP.NS --output output/urbancomp_analysis.json
+```
+Each command generates a JSON output file for the ticker.
+
+---
+
+#  Database Schema (output)
+
+See the section **Database Schema** below for table and field details. All analysis results are also exported as JSON (see Usage Examples).
+
+---
+
+#  Design Decisions
+
+See the **Design Decisions** section for:
+- Forward-fill strategy for fundamentals
+- 3-step fallback for missing data
+- Idempotent database design
+- Ticker format handling (US/India, regular/IPO)
+
+---
+
+#  Data Quality Notes
+
+- All data is validated using Pydantic models.
+- Missing or partial data is handled gracefully (see Edge Cases).
+- Logs record all fallback and error-handling events for transparency.
+
+---
+
+#  Testing Instructions
+
+Run all tests:
+```sh
+poetry run pytest -v
+```
+Tested on:
+- Old/regular US stocks: NVDA, AAPL, MSFT
+- Old/regular Indian stocks: RELIANCE.NS, TCS.NS
+- Recent IPOs (US/India): SWIGGY.NS, HYUNDAI.NS, URBANCOMP.NS
+
+Check JSON outputs for each ticker to validate correct pipeline operation across all stock types.
+
+---
+## Testing & Validation Checklist
+
+### Stock Types
+- **US Old/Regular:** NVDA, AAPL, MSFT
+- **US Recent IPO:** (any <10 months)
+- **India Old/Regular:** RELIANCE.NS, TCS.NS
+- **India Recent IPO:** SWIGGY.NS, HYUNDAI.NS, URBANCOMP.NS
+
+### Pipeline Functions
+- Fetch & validate data (OHLCV & fundamentals)
+- Merge daily & quarterly data
+- Calculate technical indicators: 50/200-day SMA, 52-week high
+- Calculate fundamental ratios: P/B, BVPS, EV
+- Detect Golden Crossover / Death Cross
+- Save to SQLite database (idempotent insert)
+- Export JSON results
+
+### Edge Cases
+- Missing fundamental data
+- Short price history (recent IPOs)
+- NaN or partial data in calculations
+- Cross-market tickers handled correctly
+
+### Logging & Debugging
+- Logging level set in `config.yaml`:
+  ```yaml
+  logging:
+    level: "INFO"
+  ```
+- Check logs for:
+  - Missing data fallback usage
+  - API errors or timeouts
+  - Idempotent database insert messages
+
+### Quick Tips
+- Always validate data before processing.
+- Use forward-fill or synthetic metrics for missing fundamentals.
+- Ensure database inserts are idempotent (no duplicates).
+- Handle market-specific ticker formats (`.NS` for NSE, no suffix for US).
+- Document design decisions and assumptions in the README.
+
+---
 
 # Financial Analyzer
 
@@ -151,8 +271,8 @@ poetry run pytest
 
 ### Code Quality
 ```sh
-ruff check --fix
-ruff format
+poetry run ruff check --fix
+poetry run ruff format
 ```
 
 
@@ -233,7 +353,6 @@ The system handles various edge cases:
 MIT License
 
 ## Authors
-- Your Name Here
+- ArunReddy
 
----
-*This project is for educational and research purposes. Not financial advice.*
+

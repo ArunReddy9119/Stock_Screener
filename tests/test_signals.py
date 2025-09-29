@@ -1,6 +1,6 @@
 # tests/test_signals.py
-import pytest
 from src.signals import detect_golden_crossover, detect_death_cross
+
 
 def test_golden_crossover_detected(golden_crossover_df):
     dates = detect_golden_crossover(golden_crossover_df)
@@ -11,17 +11,22 @@ def test_golden_crossover_detected(golden_crossover_df):
     expected_date = dates[0]  # The logic returns the first crossover
     assert dates[0] == expected_date
 
+
 def test_no_false_positive():
     import pandas as pd
     from datetime import date, timedelta
+
     dates = [date.today() - timedelta(days=i) for i in range(100)][::-1]
-    df = pd.DataFrame({
-        'date': dates,
-        'sma_50': [100] * 100,
-        'sma_200': [105] * 100  # 50 always below 200
-    })
+    df = pd.DataFrame(
+        {
+            "date": dates,
+            "sma_50": [100] * 100,
+            "sma_200": [105] * 100,  # 50 always below 200
+        }
+    )
     crossovers = detect_golden_crossover(df)
     assert len(crossovers) == 0
+
 
 def test_death_cross_detected(death_cross_df):
     dates = detect_death_cross(death_cross_df)

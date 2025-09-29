@@ -10,20 +10,15 @@ from .signals import detect_golden_crossover, detect_death_cross
 from .database import init_db, save_daily_metrics, save_signal_events
 from .models import SignalEvent
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Run financial analysis pipeline for a given stock ticker."
     )
     parser.add_argument(
-        "--ticker",
-        required=True,
-        help="Stock ticker (e.g., NVDA or RELIANCE.NS)"
+        "--ticker", required=True, help="Stock ticker (e.g., NVDA or RELIANCE.NS)"
     )
-    parser.add_argument(
-        "--output",
-        required=True,
-        help="Output JSON file path"
-    )
+    parser.add_argument("--output", required=True, help="Output JSON file path")
     args = parser.parse_args()
 
     config = load_config()
@@ -42,6 +37,7 @@ def main():
         processed = process_data(raw)
 
         import pandas as pd
+
         df_signals = pd.DataFrame([p.model_dump() for p in processed])
 
         logger.info("Detecting signals")
@@ -50,9 +46,13 @@ def main():
 
         signal_events = []
         for d in golden_dates:
-            signal_events.append(SignalEvent(ticker=args.ticker, signal_type="golden_crossover", date=d))
+            signal_events.append(
+                SignalEvent(ticker=args.ticker, signal_type="golden_crossover", date=d)
+            )
         for d in death_dates:
-            signal_events.append(SignalEvent(ticker=args.ticker, signal_type="death_cross", date=d))
+            signal_events.append(
+                SignalEvent(ticker=args.ticker, signal_type="death_cross", date=d)
+            )
 
         logger.info("Saving to database")
         save_daily_metrics(engine, processed)
@@ -61,7 +61,7 @@ def main():
         output_data = {
             "ticker": args.ticker,
             "daily_metrics": [m.model_dump() for m in processed],
-            "signals": [s.model_dump() for s in signal_events]
+            "signals": [s.model_dump() for s in signal_events],
         }
 
         Path(args.output).parent.mkdir(parents=True, exist_ok=True)
@@ -75,6 +75,7 @@ def main():
     except Exception as e:
         logger.error(f"Pipeline failed for {args.ticker}: {e}", exc_info=True)
         exit(1)
+
 
 if __name__ == "__main__":
     main()
